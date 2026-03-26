@@ -26,10 +26,11 @@ parse_comma_numeric <- function(x) {
 #' Uses temperature (C), relative humidity (%), and wind speed (m/s)
 #' Reference: Steadman (1984), adapted by ABM
 compute_apparent_temp <- function(temp_c, rh_pct, wind_ms) {
-  # Water vapor pressure (hPa)
-  e <- (rh_pct / 100) * 6.105 * exp((17.27 * temp_c) / (237.7 + temp_c))
-  # Apparent temperature
-  at <- -2.7 + 1.04 * temp_c + 2.0 * e - 0.65 * wind_ms
+  # Water vapor pressure in kPa (Steadman formula requires kPa)
+  e_hpa <- (rh_pct / 100) * 6.105 * exp((17.27 * temp_c) / (237.7 + temp_c))
+  e_kpa <- e_hpa / 10
+  # Apparent temperature (Steadman 1984)
+  at <- -2.7 + 1.04 * temp_c + 2.0 * e_kpa - 0.65 * wind_ms
   at
 }
 
