@@ -139,7 +139,7 @@ aggregate_to_daily <- function(hourly_df) {
       wind_gust_min   = min(wind_gust_ms,   na.rm = TRUE),
       
       precip_total    = sum(precip_mm,      na.rm = TRUE),
-      
+
       n_obs           = n(),
       n_tmax_valid    = sum(!is.na(tmax_c)),
       .groups         = "drop"
@@ -252,6 +252,7 @@ summarise_output <- function(df, label) {
   message(sprintf("\n--- %s ---", label))
   message(sprintf("  Rows: %d  |  Date range: %s to %s",
                   nrow(df), min(df$date), max(df$date)))
+  message(sprintf("  Columns: %s", paste(names(df), collapse = ", ")))
   message(sprintf("  Tmax range: %.1f to %.1f  (NA: %d)",
                   min(df$tmax_daily, na.rm = TRUE),
                   max(df$tmax_daily, na.rm = TRUE),
