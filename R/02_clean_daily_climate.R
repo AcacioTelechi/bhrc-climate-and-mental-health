@@ -112,6 +112,7 @@ aggregate_to_daily <- function(hourly_df) {
       tmax_daily      = max(tmax_c,         na.rm = TRUE),
       tmin_daily      = min(tmin_c,         na.rm = TRUE),
       tmean_daily     = mean(temp_drybulb_c, na.rm = TRUE),
+      tsd_daily       = if_else(n() > 1, sd(temp_drybulb_c, na.rm = TRUE), NA_real_),
 
       dewpoint_daily  = mean(dewpoint_c,    na.rm = TRUE),
       dewpoint_max_daily = max(dewpoint_max_c, na.rm = TRUE),
