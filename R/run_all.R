@@ -10,7 +10,8 @@ steps <- c(
   "R/04_derive_birth_dates.R",
   "R/05_compute_csei_components.R",
   "R/06_build_csei.R",
-  "R/07_merge_analytical.R"
+  "R/07_merge_analytical.R",
+  "R/08_describe_climate.R"
 )
 
 for (step in steps) {
