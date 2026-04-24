@@ -50,7 +50,7 @@ Continuous climate measurements only. Ordered semantically in the output (temper
 8. `radiation_total`
 9. `wind_mean`
 10. `precip_total`
-11. `apparent_temp` (derived via `compute_apparent_temp()`)
+11. `apparent_temp` (pre-computed upstream in `02_clean_daily_climate.R` via `compute_apparent_temp()` from `utils.R`)
 
 **Explicitly excluded** (not physical measurements): `date`, `n_obs`, `n_tmax_valid`, `long_gap`.
 
