@@ -112,15 +112,34 @@ aggregate_to_daily <- function(hourly_df) {
       tmax_daily      = max(tmax_c,         na.rm = TRUE),
       tmin_daily      = min(tmin_c,         na.rm = TRUE),
       tmean_daily     = mean(temp_drybulb_c, na.rm = TRUE),
+
       dewpoint_daily  = mean(dewpoint_c,    na.rm = TRUE),
+      dewpoint_max_daily = max(dewpoint_max_c, na.rm = TRUE),
+      dewpoint_min_daily = min(dewpoint_min_c, na.rm = TRUE),
+
       humidity_mean   = mean(rh_pct,        na.rm = TRUE),
-      humidity_min    = min(rh_pct,         na.rm = TRUE),
+      humidity_min    = min(rh_min_pct,         na.rm = TRUE),
+      humidity_max    = max(rh_max_pct,         na.rm = TRUE),
+      
       pressure_mean   = mean(pressure_mbar, na.rm = TRUE),
       pressure_max    = max(pressure_max_mbar, na.rm = TRUE),
       pressure_min    = min(pressure_min_mbar, na.rm = TRUE),
+      
       radiation_total = sum(radiation_kj,   na.rm = TRUE),
+      radiation_mean  = mean(radiation_kj,  na.rm = TRUE),
+      radiation_max   = max(radiation_kj,   na.rm = TRUE),
+      radiation_min   = min(radiation_kj,   na.rm = TRUE),
+      
       wind_mean       = mean(wind_speed_ms, na.rm = TRUE),
+      wind_max        = max(wind_speed_ms,  na.rm = TRUE), 
+      wind_min        = min(wind_speed_ms,  na.rm = TRUE),
+
+      wind_gust_max   = max(wind_gust_ms,   na.rm = TRUE),
+      wind_gust_mean  = mean(wind_gust_ms,  na.rm = TRUE),
+      wind_gust_min   = min(wind_gust_ms,   na.rm = TRUE),
+      
       precip_total    = sum(precip_mm,      na.rm = TRUE),
+      
       n_obs           = n(),
       n_tmax_valid    = sum(!is.na(tmax_c)),
       .groups         = "drop"
