@@ -57,34 +57,8 @@ read_inmet_csv <- function(path) {
 }
 
 # ---------------------------------------------------------------------------
-# Read a single XLSX file (2021 standalone, same structure, header at row 9)
-# ---------------------------------------------------------------------------
-read_inmet_xlsx <- function(path) {
-  raw <- read_excel(
-    path,
-    skip      = 8,
-    col_names = TRUE,
-    col_types = "text"
-  )
-
-  # Keep only first 19 columns
-  raw <- raw[, seq_len(min(19, ncol(raw)))]
-  names(raw) <- COL_NAMES
-
-  raw <- raw %>%
-    filter(!is.na(date) & date != "Data") %>%   # drop any residual header rows
-    mutate(
-      date = as.Date(str_replace_all(date, "/", "-")),
-      across(all_of(COL_NAMES[-(1:2)]), parse_comma_numeric)
-    )
-
-  raw
-}
-
-# ---------------------------------------------------------------------------
-# Read all files in a city directory; for 2021, prefer the xlsx over CSV
-# to avoid double-counting, but read both and deduplicate if needed.
-# Strategy: read CSV for all years; for 2021 also read xlsx; combine and
+# Read all files in a city directory; 
+# Strategy: read CSV for all years; combine and
 # deduplicate by date + hour_utc keeping xlsx rows where both exist.
 # ---------------------------------------------------------------------------
 read_city_hourly <- function(dir_path) {
@@ -102,28 +76,7 @@ read_city_hourly <- function(dir_path) {
     })
   })
 
-  xlsx_data <- map_dfr(xlsx_files, function(f) {
-    message(sprintf("    xlsx: %s", basename(f)))
-    tryCatch(read_inmet_xlsx(f), error = function(e) {
-      warning(sprintf("Failed to read %s: %s", f, conditionMessage(e)))
-      NULL
-    })
-  })
-
-  # Combine; where xlsx rows exist for same date+hour, they take priority
-  if (nrow(xlsx_data) > 0) {
-    xlsx_keys <- xlsx_data %>% select(date, hour_utc) %>% mutate(.src = "xlsx")
-    csv_filtered <- csv_data %>%
-      anti_join(
-        xlsx_data %>% select(date) %>% distinct(),
-        by = "date"
-      )
-    combined <- bind_rows(csv_filtered, xlsx_data)
-  } else {
-    combined <- csv_data
-  }
-
-  combined %>%
+  csv_data %>%
     filter(!is.na(date)) %>%
     arrange(date)
 }
@@ -163,6 +116,8 @@ aggregate_to_daily <- function(hourly_df) {
       humidity_mean   = mean(rh_pct,        na.rm = TRUE),
       humidity_min    = min(rh_pct,         na.rm = TRUE),
       pressure_mean   = mean(pressure_mbar, na.rm = TRUE),
+      pressure_max    = max(pressure_max_mbar, na.rm = TRUE),
+      pressure_min    = min(pressure_min_mbar, na.rm = TRUE),
       radiation_total = sum(radiation_kj,   na.rm = TRUE),
       wind_mean       = mean(wind_speed_ms, na.rm = TRUE),
       precip_total    = sum(precip_mm,      na.rm = TRUE),

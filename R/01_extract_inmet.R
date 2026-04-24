@@ -8,8 +8,7 @@ library(zip)
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-inmet_dir <- "data/Base de dados Clima-20260325T214746Z-1-001/Base de dados Clima/INMET"
-standalone_dir <- "data/Base de dados Clima-20260325T214746Z-1-001/Base de dados Clima"
+inmet_dir <- "data/INMET"
 out_pa  <- "data/raw/porto_alegre"
 out_sp  <- "data/raw/sao_paulo"
 
@@ -70,40 +69,14 @@ for (yr in years) {
   extract_station_year(year_zip, "A701", out_sp, yr)
 }
 
-# ---------------------------------------------------------------------------
-# Copy standalone xlsx files for 2021
-# ---------------------------------------------------------------------------
-message("\n=== Copying standalone xlsx files for 2021 ===")
-
-xlsx_pa <- file.path(standalone_dir,
-  "INMET_S_RS_A801_PORTO ALEGRE_01-01-2021_A_31-12-2021.xlsx")
-xlsx_sp <- file.path(standalone_dir,
-  "INMET_SE_SP_A701_SAO PAULO - MIRANTE_01-01-2021_A_31-12-2021.xlsx")
-
-dest_xlsx_pa <- file.path(out_pa, "INMET_A801_2021.xlsx")
-dest_xlsx_sp <- file.path(out_sp, "INMET_A701_2021.xlsx")
-
-if (file.exists(xlsx_pa)) {
-  file.copy(xlsx_pa, dest_xlsx_pa, overwrite = TRUE)
-  message(sprintf("  -> Saved: %s", dest_xlsx_pa))
-} else {
-  warning(sprintf("xlsx not found: %s", xlsx_pa))
-}
-
-if (file.exists(xlsx_sp)) {
-  file.copy(xlsx_sp, dest_xlsx_sp, overwrite = TRUE)
-  message(sprintf("  -> Saved: %s", dest_xlsx_sp))
-} else {
-  warning(sprintf("xlsx not found: %s", xlsx_sp))
-}
 
 # ---------------------------------------------------------------------------
 # Verify outputs
 # ---------------------------------------------------------------------------
 message("\n=== Verification ===")
 
-pa_files <- list.files(out_pa, pattern = "\\.CSV$|\\.xlsx$", full.names = FALSE)
-sp_files <- list.files(out_sp, pattern = "\\.CSV$|\\.xlsx$", full.names = FALSE)
+pa_files <- list.files(out_pa, pattern = "\\.CSV$", full.names = FALSE)
+sp_files <- list.files(out_sp, pattern = "\\.CSV$", full.names = FALSE)
 
 message(sprintf("Porto Alegre files (%d):", length(pa_files)))
 for (f in sort(pa_files)) message(sprintf("  %s", f))
