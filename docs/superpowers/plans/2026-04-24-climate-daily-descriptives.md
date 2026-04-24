@@ -16,7 +16,7 @@
 
 - **Create:** `R/08_describe_climate.R` — the new descriptives script.
 - **Modify:** `R/run_all.R` — append the new step to the pipeline.
-- **Produced at runtime:** `output/tables/climate_daily_descriptives.csv` — not committed (this project commits its CSVs under `output/tables/`; see e.g. `descriptive_stats.csv`). Commit the produced CSV to match convention.
+- **Produced at runtime:** `output/tables/climate_daily_descriptives.csv` — **not committed.** The `output/` directory is gitignored project-wide (see `.gitignore:6`), and all existing CSVs under `output/tables/` are untracked derived artefacts. The CSV stays on disk as a build output; commit only the R script.
 
 Each file has one responsibility: `08_describe_climate.R` writes exactly one CSV; `run_all.R` orchestrates pipeline order.
 
@@ -180,14 +180,17 @@ Expected: two rows (POA and SP) with `mean` in the 22–30 °C range and `max` �
 - [ ] **Step 5: Commit**
 
 ```bash
-git add R/08_describe_climate.R output/tables/climate_daily_descriptives.csv
+git add R/08_describe_climate.R
 git commit -m "feat: add 08_describe_climate — per-city daily climate descriptives
 
-Writes output/tables/climate_daily_descriptives.csv (22 rows = 2 cities ×
-11 climate variables) with n_total, n_nonmiss, mean, sd, median, p25, p75,
-min, max. Variables ordered semantically (temp → humidity → other → precip
-→ derived). In-script stopifnot() verifies row count, non-NaN/Inf numerics,
-precip non-negativity, and n_total matching input row counts.
+Adds R/08_describe_climate.R, which writes
+output/tables/climate_daily_descriptives.csv (22 rows = 2 cities ×
+11 climate variables) with n_total, n_nonmiss, mean, sd, median, p25,
+p75, min, max. Variables ordered semantically (temp → humidity → other
+→ precip → derived). In-script stopifnot() verifies row count,
+non-NaN/Inf numerics, precip non-negativity, and n_total matching
+input row counts. CSV is a derived artefact and not tracked (output/
+is gitignored).
 
 Spec: docs/superpowers/specs/2026-04-24-climate-daily-descriptives-design.md"
 ```
