@@ -45,7 +45,7 @@ pca_vars <- c(
   # Heat intensity
   "tmax_daily", "tmin_daily", "tmean_daily", "apparent_temp",
   # Extreme heat (per-city seasonal thresholds + canonical heatwave flag)
-  "above_p90", "above_p95", "hw_day", "excess_p90",
+  "above_p90", "above_p95", "hw_day", "excess_p90", "excess_p95",
   # Within-day variability
   "tsd_daily", "dtr",
   # Moisture
@@ -68,6 +68,7 @@ nice_names <- c(
   above_p95             = "Above P95",
   hw_day                = "Heatwave day",
   excess_p90            = "Excess over P90",
+  excess_p95            = "Excess over P95",
   tsd_daily             = "Within-day temp SD",
   dtr                   = "Diurnal temp range",
   dewpoint_daily        = "Dewpoint",
@@ -89,7 +90,7 @@ var_group <- c(
   tmax_daily = "Heat intensity", tmin_daily = "Heat intensity",
   tmean_daily = "Heat intensity", apparent_temp = "Heat intensity",
   above_p90 = "Extreme heat", above_p95 = "Extreme heat",
-  hw_day = "Extreme heat", excess_p90 = "Extreme heat",
+  hw_day = "Extreme heat", excess_p90 = "Extreme heat", excess_p95 = "Extreme heat",
   tsd_daily = "Variability", dtr = "Variability",
   dewpoint_daily = "Moisture", dewpoint_range_daily = "Moisture",
   humidity_mean = "Moisture", humidity_min = "Moisture", humidity_max = "Moisture",
@@ -143,7 +144,8 @@ build_daily_features <- function(daily_path, hw_path, city_label) {
     mutate(
       above_p90  = tmax_daily > thr_p90 & !is.na(tmax_daily),
       above_p95  = tmax_daily > thr_p95 & !is.na(tmax_daily),
-      excess_p90 = pmax(tmax_daily - thr_p90, 0, na.rm = TRUE)
+      excess_p90 = pmax(tmax_daily - thr_p90, 0, na.rm = TRUE),
+      excess_p95 = pmax(tmax_daily - thr_p95, 0, na.rm = TRUE)
     )
 
   hw_events    <- readRDS(hw_path) %>% filter(hw_def == HW_DEF)
@@ -177,7 +179,8 @@ daily_all <- daily_all %>%
     above_p90_raw  = as.integer(above_p90),
     above_p95_raw  = as.integer(above_p95),
     hw_day_raw     = as.integer(hw_day),
-    excess_p90_raw = excess_p90
+    excess_p90_raw = excess_p90,
+    excess_p95_raw = excess_p95
   )
 
 # ── Within-city z-score, drop incomplete rows ───────────────────────────────
@@ -189,7 +192,8 @@ daily_z <- daily_all %>%
 
 df_pca <- daily_z %>%
   select(city, date, all_of(pca_vars),
-         above_p90_raw, above_p95_raw, hw_day_raw, excess_p90_raw) %>%
+         above_p90_raw, above_p95_raw, hw_day_raw,
+         excess_p90_raw, excess_p95_raw) %>%
   drop_na(all_of(pca_vars))
 
 cat("Complete days for joint PCA:", nrow(df_pca),
@@ -229,9 +233,11 @@ scores_df <- as.data.frame(pca_fit$x) %>%
     above_p90  = as.logical(df_pca$above_p90_raw),
     above_p95  = as.logical(df_pca$above_p95_raw),
     hw_day     = as.logical(df_pca$hw_day_raw),
-    excess_p90 = df_pca$excess_p90_raw
+    excess_p90 = df_pca$excess_p90_raw,
+    excess_p95 = df_pca$excess_p95_raw
   ) %>%
-  select(city, date, above_p90, above_p95, hw_day, excess_p90, everything())
+  select(city, date, above_p90, above_p95, hw_day,
+         excess_p90, excess_p95, everything())
 write.csv(scores_df,
           file.path(table_dir, "pca_inmet_daily_scores.csv"),
           row.names = FALSE)

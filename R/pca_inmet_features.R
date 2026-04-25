@@ -55,7 +55,8 @@ pca_vars <- c(
   # Heat intensity
   "mean_tmax", "max_tmax", "mean_tmean", "mean_apparent",
   # Extreme heat
-  "days_above_p90", "days_above_p95", "hw_days", "degree_days_p90",
+  "days_above_p90", "days_above_p95", "hw_days",
+  "degree_days_p90", "degree_days_p95",
   # Variability
   "sd_tmax", "sd_tmean", "mean_dtr", "sd_dtr", "mean_tsd",
   # Moisture
@@ -78,6 +79,7 @@ nice_names <- c(
   days_above_p95       = "Days > P95",
   hw_days              = "Heatwave days",
   degree_days_p90      = "Degree-days (P90)",
+  degree_days_p95      = "Degree-days (P95)",
   sd_tmax              = "SD Tmax",
   sd_tmean             = "SD Tmean",
   mean_dtr             = "Diurnal temp range",
@@ -105,6 +107,7 @@ var_group <- c(
   mean_tmean = "Heat intensity", mean_apparent = "Heat intensity",
   days_above_p90 = "Extreme heat", days_above_p95 = "Extreme heat",
   hw_days = "Extreme heat", degree_days_p90 = "Extreme heat",
+  degree_days_p95 = "Extreme heat",
   sd_tmax = "Variability", sd_tmean = "Variability",
   mean_dtr = "Variability", sd_dtr = "Variability",
   mean_tsd = "Variability",
@@ -169,7 +172,8 @@ build_monthly_features <- function(daily_path, hw_path, city_label) {
     mutate(
       above_p90  = tmax_daily > thr_p90 & !is.na(tmax_daily),
       above_p95  = tmax_daily > thr_p95 & !is.na(tmax_daily),
-      excess_p90 = pmax(tmax_daily - thr_p90, 0, na.rm = TRUE)
+      excess_p90 = pmax(tmax_daily - thr_p90, 0, na.rm = TRUE),
+      excess_p95 = pmax(tmax_daily - thr_p95, 0, na.rm = TRUE)
     )
 
   hw_events    <- readRDS(hw_path) %>% filter(hw_def == HW_DEF)
@@ -196,6 +200,8 @@ build_monthly_features <- function(daily_path, hw_path, city_label) {
       hw_days         = sum(hw_day, na.rm = TRUE),
       mean_excess_p90 = mean(excess_p90[above_p90], na.rm = TRUE),
       degree_days_p90 = sum(excess_p90, na.rm = TRUE),
+      mean_excess_p95 = mean(excess_p95[above_p95], na.rm = TRUE),
+      degree_days_p95 = sum(excess_p95, na.rm = TRUE),
 
       # --- Temperature variability ---
       sd_tmax  = sd(tmax_daily, na.rm = TRUE),
@@ -229,6 +235,7 @@ build_monthly_features <- function(daily_path, hw_path, city_label) {
     ) %>%
     mutate(
       mean_excess_p90 = ifelse(is.nan(mean_excess_p90), 0, mean_excess_p90),
+      mean_excess_p95 = ifelse(is.nan(mean_excess_p95), 0, mean_excess_p95),
       city = city_label
     )
 

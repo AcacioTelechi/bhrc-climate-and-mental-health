@@ -76,9 +76,25 @@ compute_coverage <- function(window_start, window_end, climate_dates) {
   covered / total_days
 }
 
-#' Compute rolling calendar-day percentile threshold
-#' For each day-of-year, pools observations within +/- half_window days across all years
-compute_seasonal_threshold <- function(daily_data, temp_col, percentile, half_window = 7) {
+#' Compute percentile threshold for daily climate data.
+#'
+#' Two modes, both returning a tibble (doy = 1..366, threshold) so callers can
+#' left_join on `doy` regardless of the mode chosen:
+#'
+#'   * seasonal = FALSE (default): a single city-fixed percentile of the entire
+#'     daily series, broadcast to all 366 DOYs. Use this for absolute heat
+#'     thresholds (the lay meaning of "heatwave" — physiologically intense).
+#'
+#'   * seasonal = TRUE: per-DOY rolling threshold built from a +/- half_window
+#'     pooled sample across years. Use this for anomaly-based definitions
+#'     where "hot for the time of year" matters (acclimatization framing).
+compute_seasonal_threshold <- function(daily_data, temp_col, percentile,
+                                       half_window = 7, seasonal = FALSE) {
+  if (!seasonal) {
+    fixed_thr <- quantile(daily_data[[temp_col]], probs = percentile, na.rm = TRUE)
+    return(tibble(doy = 1:366, threshold = as.numeric(fixed_thr)))
+  }
+
   daily_data <- daily_data %>%
     mutate(doy = yday(date))
 

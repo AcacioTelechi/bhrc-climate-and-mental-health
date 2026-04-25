@@ -19,7 +19,8 @@ source("R/utils.R")
 #     PC1..PC5 (instantaneous),
 #     above_p90, above_p95, hw_day, excess_p90,
 #     n_above_p90_{3,7,14,30}d, n_above_p95_{3,7,14,30}d,
-#     n_hw_days_{7,14,30}d, sum_excess_p90_{7,14,30}d,
+#     n_hw_days_{7,14,30}d,
+#     sum_excess_p90_{7,14,30}d, sum_excess_p95_{7,14,30}d,
 #     mean_PC{1..4}_{7,14,30}d, max_PC{1..4}_{7,14,30}d,
 #     PC{1..4}_lag{1,3,7,14}
 # ──────────────────────────────────────────────────────────────────────────────
@@ -89,10 +90,11 @@ build_features_for_city <- function(df) {
     df[[paste0("n_above_p95_", n, "d")]] <- roll_sum_right(as.integer(df$above_p95), n)
   }
 
-  # 2) Heatwave-day counts and cumulative excess heat
+  # 2) Heatwave-day counts and cumulative excess heat (over P90 and P95)
   for (n in WINDOWS_HW) {
     df[[paste0("n_hw_days_", n, "d")]]      <- roll_sum_right(as.integer(df$hw_day), n)
     df[[paste0("sum_excess_p90_", n, "d")]] <- roll_sum_right(df$excess_p90, n)
+    df[[paste0("sum_excess_p95_", n, "d")]] <- roll_sum_right(df$excess_p95, n)
   }
 
   # 3) Rolling mean/max of selected PCs
@@ -122,7 +124,8 @@ features <- scores %>%
 # ── Reorder columns: identifiers, instantaneous, derived ────────────────────
 key_cols  <- c("city", "date")
 instant   <- intersect(c(paste0("PC", 1:5),
-                         "above_p90", "above_p95", "hw_day", "excess_p90"),
+                         "above_p90", "above_p95", "hw_day",
+                         "excess_p90", "excess_p95"),
                        names(features))
 derived   <- setdiff(names(features), c(key_cols, instant))
 features  <- features[, c(key_cols, instant, derived)]
